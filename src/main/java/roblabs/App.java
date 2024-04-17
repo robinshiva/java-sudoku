@@ -14,12 +14,14 @@ import javafx.scene.layout.VBox;
 public class App extends Application {
 
     private static Scene scene;
-    private Grid grid;
+    private Game game;
+    private BoardUI boardUI;
 
     @Override
     public void start(Stage stage) throws IOException {
-        this.grid = new Grid();
-        Board board = new Board(this.grid);
+        this.game = new Game();
+        this.boardUI = new BoardUI(this.game);
+        this.game.giveBoardUI(boardUI);
 
         // Create menu
         Menu menu1 = new Menu("Game");
@@ -30,7 +32,7 @@ public class App extends Application {
         menu1.getItems().addAll(newGameMenuItem, saveMenuItem, loadMenuItem);
         menuBar.getMenus().add(menu1);
 
-        VBox vBox = new VBox(menuBar, board);
+        VBox vBox = new VBox(menuBar, boardUI);
         scene = new Scene(vBox);
         stage.setScene(scene);
         stage.show();
