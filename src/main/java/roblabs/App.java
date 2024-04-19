@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.Optional;
 import java.io.File;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -15,18 +16,20 @@ import javafx.scene.control.ChoiceDialog;
 import javafx.scene.layout.VBox;
 
 
-
 public class App extends Application {
 
     private static Scene scene;
     private Game game;
     private BoardUI boardUI;
+    private Stage stage;
 
     @Override
     public void start(Stage stage) throws IOException {
+
         this.game = new Game();
         this.boardUI = new BoardUI(this.game);
         this.game.giveBoardUI(boardUI);
+        this.stage = stage;
 
         // Create menu
         Menu gameMenu = new Menu("Game");
@@ -35,7 +38,8 @@ public class App extends Application {
         MenuItem saveMenuItem = new MenuItem("Save");
         MenuItem loadMenuItem = new MenuItem("Load");
         CheckMenuItem wrongNumberColorSettingItem = new CheckMenuItem("Show wrong numbers");
-        wrongNumberColorSettingItem.setSelected(true);;
+
+        // Option to save to file
         saveMenuItem.setOnAction((event) -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save To File");
@@ -45,6 +49,8 @@ public class App extends Application {
             File file = fileChooser.showSaveDialog(stage);
             this.game.saveGame(file);
         });
+
+        // Option to load a game from a file
         loadMenuItem.setOnAction((event) -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Save File");
@@ -52,35 +58,50 @@ public class App extends Application {
                     new ExtensionFilter("Save Files", "*.ser"));
             File file = fileChooser.showOpenDialog(stage);
             this.game.loadGame(file);
+            
         });
+
+        // Option to start a new game and choosing a difficulty
         newGameMenuItem.setOnAction((event) -> {
             ChoiceDialog<Difficulty> difficultyChoice = new ChoiceDialog<>(Difficulty.MEDIUM, Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD);
+            difficultyChoice.setTitle("New Game");
             difficultyChoice.setContentText("Difficulty: ");
             difficultyChoice.setHeaderText("Choose a difficulty for the new game");
-            difficultyChoice.showAndWait();
-            this.game.newGame(difficultyChoice.getSelectedItem());
-            stage.setTitle("Robindoku 0.3 - Difficulty: " + this.game.getDifficulty());
+            Optional<Difficulty> choice = difficultyChoice.showAndWait();
+            if (choice.isPresent()) {
+                this.game.newGame(difficultyChoice.getSelectedItem());
+                updateTitle();
+            }
         });
+
+        // Option to show that numbers are wrong
+        wrongNumberColorSettingItem.setSelected(true);
         wrongNumberColorSettingItem.setOnAction((event) -> {
             this.game.showWrongNumberSetting(wrongNumberColorSettingItem.isSelected());
             this.game.updateWholeUI();
         });
-        // Implement new game functionality
+
+        // Add all items to menubar
         MenuBar menuBar = new MenuBar();
         gameMenu.getItems().addAll(newGameMenuItem, saveMenuItem, loadMenuItem);
         settingsMenu.getItems().add(wrongNumberColorSettingItem);
         menuBar.getMenus().addAll(gameMenu, settingsMenu);
 
+        // Draw scene
         VBox vBox = new VBox(menuBar, boardUI);
         scene = new Scene(vBox);
-        stage.setScene(scene);
-        stage.show();
-        stage.setTitle("Robindoku 0.3 - Difficulty: " + this.game.getDifficulty());
-        stage.setResizable(false);
+        this.stage.setScene(scene);
+        this.stage.show();
+        this.stage.setResizable(false);
+        updateTitle();
     }
 
     public static void main(String[] args) {
         launch();
     }
 
+    // Updates the title with difficulty of the current game
+    public void updateTitle() {
+        this.stage.setTitle("Robindoku v0.3 - " + this.game.getDifficulty());
+    }
 }
