@@ -26,8 +26,9 @@ public class BoxUI extends GridPane {
         this.setStyle("-fx-border-style:solid; -fx-border-color:grey");
     }
 
-    public void updateSquareUI(int squareId, int bigNumber, boolean isWrong, ArrayList<Integer> smallNumbers, boolean showBigNumber) {
-        this.squares[squareId].updateSquareUI(bigNumber, isWrong, smallNumbers, showBigNumber);
+    // Passes updatesSquareUI method through to each SquareUI instance
+    public void updateSquareUI(int squareId, int bigNumber, boolean fixedNumber, boolean isWrong, ArrayList<Integer> smallNumbers, boolean showBigNumber) {
+        this.squares[squareId].updateSquareUI(bigNumber, fixedNumber, isWrong, smallNumbers, showBigNumber);
     }
 
 }

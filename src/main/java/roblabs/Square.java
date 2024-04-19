@@ -1,8 +1,9 @@
 package roblabs;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Square {
+public class Square implements Serializable {
 
     private int bigNumber;
     private ArrayList<Integer> smallNumbers;
@@ -55,6 +56,10 @@ public class Square {
 
     public boolean getIsWrong() {
         return this.isWrong;
+    }
+
+    public boolean getFixedNumber() {
+        return this.fixedNumber;
     }
 
 }

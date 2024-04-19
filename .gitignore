@@ -62,3 +62,6 @@ Temporary Items
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Save files
+*.ser

@@ -25,9 +25,9 @@ public class BoardUI extends GridPane {
     public BoxUI getBox(int id) {
         return this.boxes[id];
     }
-
-    public void updateSquareUI(int boxId, int squareId, int bigNumber, boolean isWrong, ArrayList<Integer> smallNumbers, boolean showBigNumber) {
-        this.boxes[boxId].updateSquareUI(squareId, bigNumber, isWrong, smallNumbers, showBigNumber);
+    // Passes updateSquareUI method to all boxUI instances
+    public void updateSquareUI(int boxId, int squareId, int bigNumber, boolean fixedNumber, boolean isWrong, ArrayList<Integer> smallNumbers, boolean showBigNumber) {
+        this.boxes[boxId].updateSquareUI(squareId, bigNumber, fixedNumber, isWrong, smallNumbers, showBigNumber);
     }
 
 }
