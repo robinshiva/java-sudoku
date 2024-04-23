@@ -1,3 +1,20 @@
+/*
+<A small Sudoku app that comes with a library of puzzles to solve>
+Copyright (C) 2024 Robin Hildebrand
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package roblabs;
 
 import javafx.scene.layout.GridPane;
@@ -9,7 +26,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ContextMenu;
 import java.util.ArrayList;
 
-public class SquareUI extends GridPane {
+public class CellUI extends GridPane {
 
     private Label[] smallNumbers;
     private Label bigNumber;
@@ -23,7 +40,7 @@ public class SquareUI extends GridPane {
     private static Color changeableNumberColor = Color.GRAY;
     public static Color wrongNumberColor = Color.RED;
 
-    public SquareUI(int id, int parentId, int number, Game game) {
+    public CellUI(int id, int parentId, int number, Game game) {
 
         this.smallNumbers = new Label[9];
         this.bigNumber = new Label();
@@ -32,7 +49,7 @@ public class SquareUI extends GridPane {
         this.game = game;
         this.setStyle("-fx-border-style:solid; -fx-background-color:white; -fx-border-color:grey;");
 
-        // If number is 0, it should be an empty square that can be changed
+        // If number is 0, it should be an empty cell that can be changed
         if (number == 0) {
             this.bigNumber.setTextFill(changeableNumberColor);
             this.bigNumber.setText(" ");
@@ -47,11 +64,11 @@ public class SquareUI extends GridPane {
         // Create context menu for left mouse click
         this.contextMenuLeft = new ContextMenu();
         MenuItem[] menuItemsLeft = new MenuItem[10];
-        // Add option to clear square
+        // Add option to clear cell
         menuItemsLeft[0] = new MenuItem("Clear");
         this.contextMenuLeft.getItems().add(menuItemsLeft[0]);
         menuItemsLeft[0].setOnAction((event) -> {
-            this.game.clearSquare(this.parentId, this.id);
+            this.game.clearCell(this.parentId, this.id);
         });
 
         // Add numbers from 1 to 9
@@ -80,11 +97,13 @@ public class SquareUI extends GridPane {
         this.setOnMouseClicked((event) -> {
             if (!this.fixedNumber) {
                 if (String.valueOf(event.getButton()).equals("PRIMARY")) {
+                    this.contextMenuRight.hide();
                     this.contextMenuLeft.show(this, event.getScreenX(), event.getScreenY());
                 } else if (String.valueOf(event.getButton()).equals("SECONDARY")) {
+                    this.contextMenuLeft.hide();
                     this.contextMenuRight.show(this, event.getScreenX(), event.getScreenY());
                 } else if (String.valueOf(event.getButton()).equals("MIDDLE")) {
-                    this.game.clearSquare(this.parentId, this.id);
+                    this.game.clearCell(this.parentId, this.id);
                 }
             }
         });
@@ -108,7 +127,7 @@ public class SquareUI extends GridPane {
         }
     }
 
-    public void updateSquareUI(int bigNumber, boolean fixedNumber, boolean isWrong, ArrayList<Integer> smallNumbers, boolean showBigNumber) {
+    public void updateCellUI(int bigNumber, boolean fixedNumber, boolean isWrong, ArrayList<Integer> smallNumbers, boolean showBigNumber) {
         this.fixedNumber = fixedNumber;
         if (showBigNumber) {
             displayBigNumber(bigNumber, isWrong);
@@ -117,6 +136,7 @@ public class SquareUI extends GridPane {
         }
     }
 
+    //  Displays a given number as a big number by first removing all numbers and then showing the new one
     public void displayBigNumber(int newBigNumber, boolean isWrong) {
         this.getChildren().removeAll(smallNumbers);
         this.getChildren().removeAll(bigNumber);
@@ -137,6 +157,7 @@ public class SquareUI extends GridPane {
         this.add(this.bigNumber, 0, 0);
     }
 
+    // Displays an array of small numbers by first removing all numbers and then showing the new ones
     public void displaySmallNumbers(ArrayList<Integer> newSmallNumbers) {
         this.getChildren().removeAll(smallNumbers);
         this.getChildren().removeAll(bigNumber);

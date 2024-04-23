@@ -1,3 +1,20 @@
+/*
+<A small Sudoku app that comes with a library of puzzles to solve>
+Copyright (C) 2024 Robin Hildebrand
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package roblabs;
 
 import java.io.FileOutputStream;
@@ -16,20 +33,20 @@ import javafx.scene.paint.Color;
 
 public class Game {
 
-    private Square[][] board;
+    private Cell[][] board;
     private BoardUI boardUI;
     private Difficulty difficulty;
 
     public Game() {
 
-        this.board = new Square[9][9];
+        this.board = new Cell[9][9];
         this.difficulty = Difficulty.MEDIUM;
         
         String puzzleString = getNewGame(difficulty);;
         int k = 0;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                this.board[i][j] = new Square(Character.getNumericValue(puzzleString.charAt(k)));
+                this.board[i][j] = new Cell(Character.getNumericValue(puzzleString.charAt(k)));
                 k++;
             }
         }
@@ -58,15 +75,15 @@ public class Game {
         return boxNumbers;
     }
 
-    // Returns an individual square number when given the boxId and squareId
-    public Square getSquare(int boxId, int squareId) {
-        int col = (boxId % 3) * 3 + (squareId % 3);
-        int row = (int) Math.floor(boxId / 3) * 3 + (int) Math.floor(squareId / 3);
+    // Returns an individual cell number when given the boxId and cellId
+    public Cell geCell(int boxId, int cellId) {
+        int col = (boxId % 3) * 3 + (cellId % 3);
+        int row = (int) Math.floor(boxId / 3) * 3 + (int) Math.floor(cellId / 3);
         return this.board[row][col];
     }
 
     // Checks if a newly added number is correct according to sudoku rules
-    public boolean checkIfSquareIsWrong(int boxId, int squareId, int number) {
+    public boolean checkIfCellIsWrong(int boxId, int cellId, int number) {
         Set<Integer> nums = new HashSet<>();
         int[] boxNums = this.getBoxNumbers(boxId);
 
@@ -74,17 +91,17 @@ public class Game {
             nums.add(boxNums[i]);
         }
 
-        int[] rowNums = this.getRow(boxId, squareId);
+        int[] rowNums = this.getRow(boxId, cellId);
         for (int i = 0; i < rowNums.length; i++) {
             nums.add(rowNums[i]);
         }
 
-        int[] colNums = this.getCol(boxId, squareId);
+        int[] colNums = this.getCol(boxId, cellId);
         for (int i = 0; i < colNums.length; i++) {
             nums.add(colNums[i]);
         }
 
-        this.getBoxNumbers(boxId)[squareId] = number;
+        this.getBoxNumbers(boxId)[cellId] = number;
         if (nums.contains(number)) {
             return true;
         } else {
@@ -93,8 +110,8 @@ public class Game {
     }
 
     // Returns all numbers of a row as an int array
-    public int[] getRow(int boxId, int squareId) {
-        int rowIndex = (int) Math.floor(boxId / 3) * 3 + (int) Math.floor(squareId / 3);
+    public int[] getRow(int boxId, int cellId) {
+        int rowIndex = (int) Math.floor(boxId / 3) * 3 + (int) Math.floor(cellId / 3);
         int[] rowNums = new int[9];
         for (int i = 0; i < rowNums.length; i++) {
             rowNums[i] = this.board[rowIndex][i].getBigNumber();
@@ -103,8 +120,8 @@ public class Game {
     }
 
     // Returns all numbers of a column as an int array
-    public int[] getCol(int boxId, int squareId) {
-        int colIndex = (boxId % 3) * 3 + (squareId % 3);
+    public int[] getCol(int boxId, int cellId) {
+        int colIndex = (boxId % 3) * 3 + (cellId % 3);
         int[] colNums = new int[9];
         for (int i = 0; i < colNums.length; i++) {
             colNums[i] = this.board[i][colIndex].getBigNumber();
@@ -112,44 +129,44 @@ public class Game {
         return colNums;
     }
 
-    // Resets a square and updates the UI
-    public void clearSquare(int boxId, int squareId) {
-        getSquare(boxId, squareId).clear();
-        updateSquareUI(boxId, squareId, true);
+    // Resets a cell and updates the UI
+    public void clearCell(int boxId, int cellId) {
+        geCell(boxId, cellId).clear();
+        updateCellUI(boxId, cellId, true);
     }
 
-    // Writes a big number to a square and update the UI
-    public void setBigNumber(int boxId, int squareId, int newNumber) {
-        boolean isWrong = checkIfSquareIsWrong(boxId, squareId, newNumber);
-        getSquare(boxId, squareId).setBigNumber(newNumber, isWrong);
-        updateSquareUI(boxId, squareId, true);
+    // Writes a big number to a cell and update the UI
+    public void setBigNumber(int boxId, int cellId, int newNumber) {
+        boolean isWrong = checkIfCellIsWrong(boxId, cellId, newNumber);
+        geCell(boxId, cellId).setBigNumber(newNumber, isWrong);
+        updateCellUI(boxId, cellId, true);
     }
 
-    // Adds (or removes if it was already there) a small number to a square and update the ui
-    public void addSmallNumber(int boxId, int squareId, int newNumber) {
-        getSquare(boxId, squareId).addSmallNumber(newNumber);
-        updateSquareUI(boxId, squareId, false);
+    // Adds (or removes if it was already there) a small number to a cell and update the ui
+    public void addSmallNumber(int boxId, int cellId, int newNumber) {
+        geCell(boxId, cellId).addSmallNumber(newNumber);
+        updateCellUI(boxId, cellId, false);
     }
 
-    // Updates the UI of a given square by calling the updateSquareUI method of the boardUI
-    public void updateSquareUI(int boxId, int squareId, boolean showBigNumber) {
-        Square square = getSquare(boxId, squareId);
-        int bigNumber = square.getBigNumber();
-        boolean fixedNumber = square.getFixedNumber();
-        boolean isWrong = square.getIsWrong();
-        ArrayList<Integer> smallNumbers = square.getSmallNumbers();
-        this.boardUI.updateSquareUI(boxId, squareId, bigNumber, fixedNumber, isWrong, smallNumbers, showBigNumber);
+    // Updates the UI of a given cell by calling the updateCellUI method of the boardUI
+    public void updateCellUI(int boxId, int cellId, boolean showBigNumber) {
+        Cell cell = geCell(boxId, cellId);
+        int bigNumber = cell.getBigNumber();
+        boolean fixedNumber = cell.getFixedNumber();
+        boolean isWrong = cell.getIsWrong();
+        ArrayList<Integer> smallNumbers = cell.getSmallNumbers();
+        this.boardUI.updateCellUI(boxId, cellId, bigNumber, fixedNumber, isWrong, smallNumbers, showBigNumber);
     }
 
-    // Updates the whole UI by calling the updateSquareUI method for every square
+    // Updates the whole UI by calling the updateCellUI method for every cell
     public void updateWholeUI() {
         for (int i = 0; i < this.board.length; i++) {
             for (int j = 0; j < this.board[0].length; j++) {
                 boolean showBigNumber = false;
-                if (this.getSquare(i, j).getSmallNumbers().isEmpty()) {
+                if (this.geCell(i, j).getSmallNumbers().isEmpty()) {
                     showBigNumber = true;
                 }
-                updateSquareUI(i, j, showBigNumber);
+                updateCellUI(i, j, showBigNumber);
             }
         }
     }
@@ -200,7 +217,7 @@ public class Game {
         int k = 0;
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                this.board[i][j] = new Square(Character.getNumericValue(newGameBoardString.charAt(k)));
+                this.board[i][j] = new Cell(Character.getNumericValue(newGameBoardString.charAt(k)));
                 k++;
             }
         }
@@ -233,7 +250,7 @@ public class Game {
             ObjectInputStream in = new ObjectInputStream(fileIn);
             for (int i = 0; i < this.board.length; i++) {
                 for (int j = 0; j < this.board[0].length; j++) {
-                    this.board[i][j] = (Square) in.readObject();
+                    this.board[i][j] = (Cell) in.readObject();
                 }
             }
             this.difficulty = (Difficulty) in.readObject();
@@ -252,9 +269,9 @@ public class Game {
     // Sets the wrong number color to gray if the setting is changed to false/off
     public void showWrongNumberSetting(boolean showWrongNumber) {
         if (showWrongNumber) {
-            SquareUI.wrongNumberColor = Color.RED;
+            CellUI.wrongNumberColor = Color.RED;
         } else {
-            SquareUI.wrongNumberColor = Color.GRAY;
+            CellUI.wrongNumberColor = Color.GRAY;
         }
 
     }
